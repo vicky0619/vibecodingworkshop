@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Workshop｜AI 前端網站生成工具全攻略</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A task-oriented single-page application with a sticky navigation bar. The structure prioritizes user goals: understanding the concept ('總覽'), comparing tools ('AI 工具速查'), getting practical help ('Prompt 工作室'), following a guide ('實戰演練'), and finding answers ('Q&A'). This non-linear structure is more useful than a simple book-like format. It uses interactive elements like a radar chart for comparison and accordions for dense information, making the content more digestible and engaging, which is ideal for a workshop follow-up material where users need to quickly find and apply specific information. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Tool comparison table -> Goal: Compare -> Viz/Method: Chart.js Radar Chart + Detailed HTML cards -> Interaction: Visual comparison at a glance, with text details readily available -> Justification: Radar charts excel at multi-attribute comparisons, offering an immediate visual summary of each tool's strengths. This is more impactful than a static table. Library: Chart.js.
+        - Report Info: Prompt templates -> Goal: Organize/Inform -> Viz/Method: Tabbed interface with pre-formatted text blocks -> Interaction: Click tabs to switch tools, click a button to copy prompts -> Justification: This makes the prompts immediately actionable and easy to use, fulfilling a key user need. Method: HTML/CSS/JS.
+        - Report Info: Walkthrough and FAQ -> Goal: Organize/Inform -> Viz/Method: Accordion/collapsible sections -> Interaction: Click to expand/collapse content -> Justification: Manages information density, preventing user overload and allowing focus on one step/question at a time. Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 60vh;
+            max-height: 450px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .nav-link.active {
+            color: #854d0e; /* gold-700 */
+            font-weight: 700;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-button.open .accordion-arrow {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-[#FDF8F0] text-[#4A4A4A]">
+
+    <header class="bg-[#FDF8F0]/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold text-[#D4A373]">
+                Vibe Coding
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link text-gray-600 hover:text-[#D4A373] transition-colors">總覽</a>
+                <a href="#tools" class="nav-link text-gray-600 hover:text-[#D4A373] transition-colors">AI 工具速查</a>
+                <a href="#prompts" class="nav-link text-gray-600 hover:text-[#D4A373] transition-colors">Prompt 工作室</a>
+                <a href="#walkthrough" class="nav-link text-gray-600 hover:text-[#D4A373] transition-colors">實戰演練</a>
+                <a href="#faq" class="nav-link text-gray-600 hover:text-[#D4A373] transition-colors">Q&A</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-600 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#overview" class="block py-2 px-6 text-sm text-gray-600 hover:bg-[#F5EFE6]">總覽</a>
+            <a href="#tools" class="block py-2 px-6 text-sm text-gray-600 hover:bg-[#F5EFE6]">AI 工具速查</a>
+            <a href="#prompts" class="block py-2 px-6 text-sm text-gray-600 hover:bg-[#F5EFE6]">Prompt 工作室</a>
+            <a href="#walkthrough" class="block py-2 px-6 text-sm text-gray-600 hover:bg-[#F5EFE6]">實戰演練</a>
+            <a href="#faq" class="block py-2 px-6 text-sm text-gray-600 hover:bg-[#F5EFE6]">Q&A</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section id="overview" class="min-h-screen flex flex-col justify-center text-center pt-12 md:pt-0">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4">Vibe Coding Workshop</h1>
+            <h2 class="text-2xl md:text-3xl font-light text-[#D4A373] mb-8">AI 前端網站生成工具全攻略</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 leading-relaxed mb-12">
+                歡迎來到 Vibe Coding 的新紀元。這份互動式指南將引導您深入了解三大 AI 建站工具，精通 Prompt 詠唱技巧，並親手打造一個帶有 AI 聊天機器人的個人網站。讓我們一起用「感覺」和「意圖」來建構軟體吧！
+            </p>
+            <a href="#tools" class="bg-[#D4A373] text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-[#c8935a] transition-all transform hover:scale-105 mx-auto">
+                開始探索
+            </a>
+        </section>
+
+        <section id="tools" class="py-20">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">AI 工具速查</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    視覺化比較 Canva AI、Deepsite 與 Lovable 的核心能力。這張雷達圖能幫助您快速找到最符合您專案需求的工具。點擊下方的工具卡片查看詳細分析。
+                </p>
+            </div>
+            
+            <div class="chart-container mb-12">
+                <canvas id="toolsComparisonChart"></canvas>
+            </div>
+
+            <div id="tool-details" class="grid md:grid-cols-3 gap-8">
+                <!-- Tool cards will be injected here by JavaScript -->
+            </div>
+        </section>
+        
+        <section id="prompts" class="py-20 bg-[#F5EFE6] rounded-2xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Prompt 工作室</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    精準的 Prompt 是與 AI 高效溝通的關鍵。這裡提供了針對不同工具的 Prompt 模板，點擊切換工具，並複製模板開始您的創作。
+                </p>
+            </div>
+
+            <div class="max-w-4xl mx-auto">
+                <div class="flex justify-center border-b border-gray-300 mb-8">
+                    <button data-tab="canva" class="prompt-tab active-tab text-lg font-semibold py-2 px-6 text-amber-700 border-b-2 border-amber-700">Canva AI</button>
+                    <button data-tab="deepsite" class="prompt-tab text-lg font-semibold py-2 px-6 text-gray-500">Deepsite</button>
+                    <button data-tab="lovable" class="prompt-tab text-lg font-semibold py-2 px-6 text-gray-500">Lovable</button>
+                </div>
+
+                <div id="prompt-content-container">
+                    <!-- Prompt content will be injected here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <section id="walkthrough" class="py-20">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">實戰演練：從零到一</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    跟隨以下步驟，親手打造一個帶有 AI 聊天機器人的個人網站。點擊每個步驟以展開詳細指南。
+                </p>
+            </div>
+            <div id="walkthrough-container" class="max-w-3xl mx-auto space-y-4">
+                <!-- Walkthrough accordions will be injected here -->
+            </div>
+        </section>
+
+        <section id="faq" class="py-20 bg-[#F5EFE6] rounded-2xl">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">常見問題 Q&A</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    為您解答在探索 AI 建站工具時可能遇到的常見疑問。
+                </p>
+            </div>
+            <div id="faq-container" class="max-w-3xl mx-auto space-y-4">
+                <!-- FAQ accordions will be injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#4A4A4A] text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; Vicky Tsai. All Rights Reserved.</p>
+            <p class="text-sm mt-2 text-gray-400">這是一個基於 Vicky's Vibe Coding 工作坊內容生成的互動式學習應用程式。</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toolsData = {
+            labels: ['易用性', 'AI 生成能力', '客製化彈性', '程式碼所有權', '後端/資料庫', 'SEO 功能'],
+            datasets: [
+                {
+                    label: 'Canva AI',
+                    data: [5, 3, 1, 1, 1, 2],
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(239, 68, 68, 1)'
+                },
+                {
+                    label: 'Deepsite',
+                    data: [4, 4, 3, 5, 1, 3],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
+                },
+                {
+                    label: 'Lovable',
+                    data: [3, 5, 5, 5, 5, 4],
+                    backgroundColor: 'rgba(22, 163, 74, 0.2)',
+                    borderColor: 'rgba(22, 163, 74, 1)',
+                    pointBackgroundColor: 'rgba(22, 163, 74, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(22, 163, 74, 1)'
+                }
+            ]
+        };
+
+        const toolDetailsData = [
+            {
+                name: "Canva AI",
+                color: "red",
+                description: "一個頂尖的設計平台，其網站建構功能是其龐大設計生態系中的一項延伸服務。",
+                pros: ["極致的視覺美感", "操作直觀，對新手友好", "豐富的設計模板與素材"],
+                cons: ["功能與技術限制多", "無法存取底層程式碼", "SEO 功能薄弱"]
+            },
+            {
+                name: "Deepsite",
+                color: "blue",
+                description: "專注於「快速生成」的 AI 工具，能將一句話在數秒內轉化為一個單頁式網站。",
+                pros: ["生成速度極快", "提供完整程式碼所有權", "免費且易於使用"],
+                cons: ["僅生成靜態網站", "無內建後端功能", "客製化需自行修改程式碼"]
+            },
+            {
+                name: "Lovable",
+                color: "green",
+                description: "一個 AI 驅動的全端應用程式開發平台，扮演「AI 全端工程師」的角色。",
+                pros: ["可生成完整全端應用", "採用現代專業技術棧", "支援多人協作與 GitHub 整合"],
+                cons: ["學習曲線較陡", "採用開發者導向的訂閱制", "需要一定的技術理解"]
+            },
+        ];
+
+        const promptData = {
+            canva: [
+                {
+                    title: "圖像生成模板",
+                    content: "`A minimalist portfolio website hero image, featuring a single, elegant piece of pottery on a neutral background, in a photo-realistic style, with soft, natural lighting, calm mood, close-up.`"
+                },
+                {
+                    title: "Magic Edit / Morph 模板",
+                    content: "`Select the background of the image. Change it to a bustling Tokyo street at night with neon lights.`"
+                },
+                {
+                    title: "Magic Write 模板",
+                    content: "`Act as a professional copywriter. Write 5 options for a homepage headline for a freelance graphic designer's portfolio website. The target audience is small business owners. The tone should be modern and approachable.`"
+                }
+            ],
+            deepsite: [
+                {
+                    title: "結構化模板 (個人作品集)",
+                    content: `Create a minimalist and professional portfolio website for a UX/UI designer named Alex Doe. Use a dark theme with a navy and gold color scheme.
+
+The website must have the following sections in this order: Hero, About, Portfolio, and Contact.
+
+Section Details:
+The Hero section must feature a large headline "Designing Experiences, Building Futures", a sub-headline, and a call-to-action button that says "View My Work".
+The About section must have a circular profile photo on the left and a short bio on the right.
+The Portfolio section must be a masonry-style project gallery. Each project card should have a hover effect that displays the project title.
+The Contact section must include a simple contact form with fields for Name, Email, and Message, and it should validate the email address.`
+                }
+            ],
+            lovable: [
+                {
+                    title: "專案啟動模板",
+                    content: `# Context: You are an expert full-stack developer using Lovable.
+# Task: Build a personal portfolio website with an integrated AI chatbot.
+# Tech Stack: Use Next.js for the frontend, Tailwind CSS for styling, and Supabase for the database.
+# Core Features: A responsive portfolio gallery, a contact form, and an AI chatbot that can answer questions about me.
+# Starting Point: Start by creating the UI for the homepage.`
+                },
+                {
+                    title: "功能開發模板",
+                    content: "`Add user authentication using Supabase. Users should be able to sign up and log in with email and password.`"
+                },
+                {
+                    title: "除錯與重構模板",
+                    content: "`The layout on the portfolio page breaks on mobile screens. Please ensure the entire application is fully responsive. Use a mobile-first strategy and Tailwind CSS's standard breakpoints to fix it.`"
+                }
+            ]
+        };
+
+        const walkthroughData = [
+            { title: "Step 1: 需求回顧 (Review Requirements)", content: "首先，回到第四章您完成的「功能藍圖繪製」。確認您的網站需要哪些頁面（首頁、關於我、作品集、聯絡我）以及最重要的功能——一個能回答關於您個人資訊的 AI 聊天機器人。" },
+            { title: "Step 2: 工具選擇 (Tool Selection)", content: "根據第三章的「選擇策略」，對於一個需要整合外部 API（如 OpenAI）並處理自訂邏輯（聊天機器人）的專案，**Lovable** 是最理想的選擇。因為它提供了後端能力和前端框架，這對於實現一個真正的 AI 聊天機器人至關重要。" },
+            { title: "Step 3: 視覺原型生成 (Visual Prototype)", content: "為了加速開發，可以先用 **Deepsite** 快速生成網站的視覺原型，然後將其作為參考，在 Lovable 中實現。使用詳細的 Prompt 來生成您個人網站的靜態 HTML/CSS 原型，並保存截圖。" },
+            { title: "Step 4: 全功能開發 (Full-Featured Development)", content: "在 Lovable 中，使用「專案啟動模板」初始化專案。上傳 Deepsite 的原型截圖，並透過對話迭代開發 UI。分步下達指令，建立後端函式、聊天介面，並連接前後端以實現 AI 聊天機器人功能。" },
+            { title: "Step 5: 部署上線 (Deployment)", content: "Lovable 讓部署變得異常簡單。在專案頁面點擊「Publish」按鈕，並與 Vercel 或 Netlify 等平台無縫整合。只需幾個點擊，您的網站就會被部署到一個公開的 URL。" },
+        ];
+
+        const faqData = [
+            { question: "我真的擁有我用這些工具建立的網站和程式碼嗎？", answer: "對於 Deepsite 和 Lovable：是的，完全擁有。您可以下載所有原始碼，不受平台限制。對於 Canva：不完全擁有。您擁有內容所有權，但網站必須依附於 Canva 平台運作。" },
+            { question: "我可以使用自己的網域名稱 (Custom Domain) 嗎？", answer: "可以。三款工具都支援綁定自訂網域，但這通常是其付費方案的功能。對於 Deepsite，您可以將匯出的程式碼上傳到任何網頁主機並綁定網域。" },
+            { question: "這些工具適合建立功能完整的電子商務網站嗎？", answer: "Lovable 非常適合，可以整合 Stripe 等金流服務。Deepsite 可作為起點，生成前端佈局，但後端需手動開發。Canva 強烈不建議，缺乏原生電商工具。" },
+            { question: "AI 生成的程式碼品質如何？會不會有很多 bug？", answer: "品質正在飛速提升，目標是生成生產級程式碼。然而，如同任何軟體開發，bug 是不可避免的，尤其是在複雜邏輯的「最後 10%」，仍需人工介入調校。" },
+        ];
+
+
+        const ctx = document.getElementById('toolsComparisonChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: toolsData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 5,
+                        pointLabels: {
+                            font: {
+                                size: 14,
+                                family: "'Noto Sans TC', sans-serif"
+                            },
+                            color: '#4A4A4A'
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                           display: false,
+                           stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                family: "'Noto Sans TC', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.r !== null) {
+                                    label += '★'.repeat(context.parsed.r) + '☆'.repeat(5 - context.parsed.r);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const toolDetailsContainer = document.getElementById('tool-details');
+        toolDetailsData.forEach(tool => {
+            const card = document.createElement('div');
+            card.className = `bg-white p-6 rounded-lg shadow-lg border-t-4 border-${tool.color}-500 transition-transform transform hover:-translate-y-2`;
+            card.innerHTML = `
+                <h3 class="text-2xl font-bold mb-3 text-${tool.color}-600">${tool.name}</h3>
+                <p class="text-gray-600 mb-4">${tool.description}</p>
+                <div class="space-y-2">
+                    <div>
+                        <h4 class="font-semibold text-gray-700">優點:</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1 mt-1">
+                            ${tool.pros.map(pro => `<li>${pro}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700">缺點:</h4>
+                        <ul class="list-disc list-inside text-gray-600 space-y-1 mt-1">
+                            ${tool.cons.map(con => `<li>${con}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            toolDetailsContainer.appendChild(card);
+        });
+
+        const promptTabs = document.querySelectorAll('.prompt-tab');
+        const promptContentContainer = document.getElementById('prompt-content-container');
+
+        function renderPromptContent(tabName) {
+            promptContentContainer.innerHTML = '';
+            const content = promptData[tabName];
+            if (content) {
+                content.forEach(item => {
+                    const promptItem = document.createElement('div');
+                    promptItem.className = 'bg-white p-6 rounded-lg shadow-md mb-6';
+                    promptItem.innerHTML = `
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-xl font-semibold text-gray-700">${item.title}</h4>
+                            <button class="copy-btn bg-gray-200 text-gray-700 px-3 py-1 rounded-md text-sm hover:bg-gray-300 transition-colors">複製</button>
+                        </div>
+                        <pre class="bg-gray-800 text-white p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap"><code>${item.content.trim()}</code></pre>
+                    `;
+                    promptContentContainer.appendChild(promptItem);
+                });
+                addCopyListeners();
+            }
+        }
+
+        promptTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                promptTabs.forEach(t => {
+                    t.classList.remove('active-tab', 'text-amber-700', 'border-amber-700');
+                    t.classList.add('text-gray-500');
+                });
+                tab.classList.add('active-tab', 'text-amber-700', 'border-amber-700');
+                tab.classList.remove('text-gray-500');
+                renderPromptContent(tab.dataset.tab);
+            });
+        });
+
+        function addCopyListeners() {
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const pre = e.target.closest('div').nextElementSibling;
+                    const code = pre.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        e.target.innerText = '已複製!';
+                        setTimeout(() => {
+                            e.target.innerText = '複製';
+                        }, 2000);
+                    });
+                });
+            });
+        }
+        
+        renderPromptContent('canva');
+        
+        function createAccordion(containerId, data) {
+            const container = document.getElementById(containerId);
+            data.forEach((item, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'bg-white rounded-lg shadow-md overflow-hidden';
+                accordionItem.innerHTML = `
+                    <button class="accordion-button w-full text-left p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
+                        <span class="font-semibold text-lg text-gray-800">${item.title || item.question}</span>
+                        <span class="accordion-arrow transition-transform duration-300">
+                            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-4 text-gray-600 leading-relaxed border-t border-gray-200">${item.content || item.answer}</div>
+                    </div>
+                `;
+                container.appendChild(accordionItem);
+            });
+        }
+
+        createAccordion('walkthrough-container', walkthroughData);
+        createAccordion('faq-container', faqData);
+
+        document.querySelectorAll('.accordion-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                button.classList.toggle('open');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        });
+        
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        const navLinks = document.querySelectorAll('nav a');
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        const sections = document.querySelectorAll('section');
+        const navLi = document.querySelectorAll('header nav a.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLi.forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('href').includes(current)) {
+                    a.classList.add('active');
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
